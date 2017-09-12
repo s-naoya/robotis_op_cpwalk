@@ -16,8 +16,8 @@ $ rosrun robotis_op_cpwalk cpwalk_ctrl.py
 comming soon
 
 ## necessary package
-- cpgen
-- robotis_op_utility
+- [cpgen](https://github.com/NaoyaSaito/cpgen)
+- [robotis_op_utility](https://github.com/NaoyaSaito/robotis_op_utility)
 
 ## support version
 ROS kinetic Kame(Ubuntu 16.04) only
