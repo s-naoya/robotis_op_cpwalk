@@ -1,6 +1,6 @@
 # robotis_op_cpwalk
 Walk ROBOTIS-OP2 on gazebo simulation
-
+![walking](https://github.com/NaoyaSaito/robotis_op_cpwalk/blob/media/simple_walk.gif)
 ## usage
 ### simulation
 first terminal
