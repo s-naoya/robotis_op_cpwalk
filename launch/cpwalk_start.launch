@@ -1,6 +1,0 @@
-<launch>
-  <include file="$(find robotis_op_gazebo)/launch/robotis_op_gazebo_position_control_empty_world.launch">
-  </include>
-  <node pkg="robotis_op_cpwalk" type="robotis_op_cpwalk_node" name="robotis_op_cpwalk_node"/>
-
-</launch>
