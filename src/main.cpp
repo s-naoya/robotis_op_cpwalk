@@ -154,9 +154,15 @@ int main(int argc, char** argv) {
   std::array<cp::Quaternion, 2> base2leg{base2r, base2l};
   // for returned walking pattern
   cp::Vector3 wp_com(0.0, 0.0, body.com.z());
-  cp::cpgen cpgen(wp_com, init_leg_pos, base2leg);
+  double dt = 5e-3;
+  double single_sup_time = 0.5;
+  double double_sup_time = 0.2;
+  double cog_h = body.com.z();
+  double leg_h = 0.02;
+  cp::cpgen cpgen(wp_com, init_leg_pos, base2leg, dt, single_sup_time,
+                  double_sup_time, cog_h, leg_h);
   cp::Pose wp_right_leg_pos = cpgen.setInitLandPos(init_leg_pos[0]);
-  cp::Pose wp_left_leg_pos  = cpgen.setInitLandPos(init_leg_pos[1]);
+  cp::Pose wp_left_leg_pos = cpgen.setInitLandPos(init_leg_pos[1]);
 
   // setup control command subscriber
   wcc = neutral;

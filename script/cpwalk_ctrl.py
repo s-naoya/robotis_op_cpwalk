@@ -35,10 +35,10 @@ def main():
             pose.x -= 0.02
             cmdpos_pub.publish(pose)
         elif cmd == "e":
-            pose.theta += 2.0
+            pose.theta += 15.0
             cmdpos_pub.publish(pose)
         elif cmd == "q":
-            pose.theta -= 2.0
+            pose.theta -= 15.0
             cmdpos_pub.publish(pose)
 
 if __name__ == '__main__':
