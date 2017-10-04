@@ -59,7 +59,7 @@ class RobotisBodyUpdater {
                  const cp::Affine3& left_leg) {
     std::unordered_map<std::string, double> joint_values;
 
-    if (body.calkIKofWalkingMotion(com, right_leg, left_leg, joint_values)) {
+    if (body.calcIKofWalkingMotion(com, right_leg, left_leg, joint_values)) {
       body.publishJointCommand(joint_values);
       return true;
     } else {
