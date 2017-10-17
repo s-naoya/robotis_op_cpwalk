@@ -4,7 +4,7 @@
 //   that use topic "/robotis_op/cmd_ctrl" and "/robotis_op/cmd_pos".
 //
 // /robotis_op/cmd_ctrl : sensor_msgs/Int32.h
-//   1: walking stop, 2: walking start 3: walking finish
+//   1: walking stop, 2: walking start, 3: walking finish, 4: neutral
 // /robotis_op/cmd_pos  : geometry_msgs/Pose2D.h
 //   next step distance <x[m], y[m], theta[degree]>
 
@@ -21,6 +21,9 @@
 #include <std_msgs/Int32.h>
 
 #include <unordered_map>
+
+#include<iostream>
+#include<fstream>
 
 enum walk_control_command { stop = 1, start = 2, finish = 3, neutral = 4 };
 walk_control_command wcc;
@@ -146,12 +149,12 @@ int main(int argc, char** argv) {
   ros::Duration(1.0).sleep();  // wait to call jsCallback
 
   // initialize cpgen
-  std::array<cp::Affine3d, 2> init_leg_pos{body.getLinkAffine("MP_ANKLE2_R"),
-                                           body.getLinkAffine("MP_ANKLE2_L")};
+  cp::Affine3d init_leg_pos[2] = {body.getLinkAffine("MP_ANKLE2_R"),
+                                  body.getLinkAffine("MP_ANKLE2_L")};
   cp::Quaternion base2r(cp::AngleAxis(cp::deg2rad(90.0), cp::Vector3::UnitX()));
   cp::Quaternion base2l(
       cp::AngleAxis(cp::deg2rad(-90.0), cp::Vector3::UnitX()));
-  std::array<cp::Quaternion, 2> base2leg{base2r, base2l};
+  cp::Quaternion base2leg[2] = {base2r, base2l};
   // for returned walking pattern
   cp::Vector3 wp_com(0.0, 0.0, body.com.z());
   double dt = 5e-3;
@@ -175,6 +178,8 @@ int main(int argc, char** argv) {
   land_pos << 0.0, 0.0, cp::deg2rad(0.0);
 
   ros::Rate rate(200);  // TODO!: use param
+  std::ofstream ofs("test.csv");
+  std::string sep = ",";
   while (ros::ok()) {
     switch (wcc) {
       case stop: {
@@ -195,9 +200,11 @@ int main(int argc, char** argv) {
     }
     wcc = neutral;
     cpgen.setLandPos(land_pos);
-    cpgen.getWalkingPattern(body.com, &wp_com, &wp_right_leg_pos,
-                            &wp_left_leg_pos);
+    cpgen.getWalkingPattern(&wp_com, &wp_right_leg_pos, &wp_left_leg_pos);
+    double rl = cpgen.getSwingleg()*0.01 - 0.005;
+    double secs = ros::Time::now().toSec();
     body.calcLegIK(wp_com, wp_right_leg_pos.affine(), wp_left_leg_pos.affine());
+    ofs << secs << sep << rl << sep << wp_com[0] << sep << wp_com[1] << sep << wp_com[2] << std::endl;
     rate.sleep();
   }
   ROS_INFO("CP walk finish");
