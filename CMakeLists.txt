@@ -140,6 +140,9 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/main.cpp)
+add_executable(test_${PROJECT_NAME} src/test.cpp)
+add_executable(demotest_${PROJECT_NAME} src/demoWPG_test.cpp)
+
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -156,6 +159,14 @@ target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
   /usr/local/lib/cpgen/libcpgen.so
 )
+target_link_libraries(test_${PROJECT_NAME}
+  ${catkin_LIBRARIES}
+  /usr/local/lib/cpgen/libcpgen.so
+)
+target_link_libraries(demotest_${PROJECT_NAME}
+  ${catkin_LIBRARIES}
+)
+
 
 #############
 ## Install ##

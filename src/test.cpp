@@ -104,31 +104,6 @@ geometry_msgs::Vector3 evector2gvector(cp::Vector3 b_vec) {
   return r_vec;
 }
 
-void cmdCtrlCallback(const std_msgs::Int32& msg) {
-  int32_t t = msg.data;
-  switch (t) {
-    case 1: {
-      wcc = stop;
-      break;
-    }
-    case 2: {
-      wcc = start;
-      break;
-    }
-    case 3: {
-      wcc = finish;
-      break;
-    }
-    case 4: {
-      wcc = neutral;
-      break;
-    }
-    default: {
-      wcc = neutral;
-      break;
-    }
-  }
-}
 
 void cmdPosCallback(const geometry_msgs::Pose2D& msg) {
   land_pos << msg.x, msg.y, cp::deg2rad(msg.theta);
@@ -145,8 +120,6 @@ int main(int argc, char** argv) {
 
   // initialize RobotisBodyUpdater
   RobotisBodyUpdater body;
-  body.moveInitPosition();
-  ros::Duration(1.0).sleep();  // wait to call jsCallback
 
   // initialize cpgen
   cp::Affine3d init_leg_pos[2] = {body.getLinkAffine("MP_ANKLE2_R"),
@@ -157,62 +130,16 @@ int main(int argc, char** argv) {
   cp::Quaternion base2leg[2] = {base2r, base2l};
   // for returned walking pattern
   cp::Vector3 wp_com(0.0, 0.0, body.com.z());
-  double dt = 5e-3;
-  double single_sup_time = 0.5;
-  double double_sup_time = 0.2;
-  double cog_h = body.com.z();
-  double leg_h = 0.02;
+  double dt = 5e-3, single_sup_time = 0.5, double_sup_time = 0.2;
+  double cog_h = body.com.z(), leg_h = 0.02;
   cp::cpgen cpgen(wp_com, init_leg_pos, base2leg, dt, single_sup_time,
                   double_sup_time, cog_h, leg_h);
   cp::Pose wp_right_leg_pos = cpgen.setInitLandPos(init_leg_pos[0]);
   cp::Pose wp_left_leg_pos = cpgen.setInitLandPos(init_leg_pos[1]);
 
-  // setup control command subscriber
-  wcc = neutral;
-  ros::Subscriber cmd_ctrl_sub =
-      nh.subscribe("/robotis_op/cmd_ctrl", 1000, cmdCtrlCallback);
-
-  // set reference landing position
-  ros::Subscriber cmd_pos_sub =
-      nh.subscribe("/robotis_op/cmd_pos", 1000, cmdPosCallback);
-  land_pos << 0.0, 0.0, cp::deg2rad(0.0);
-
-  ros::Rate rate(200);  // TODO!: use param
-  std::ofstream ofs("test.csv");
-  std::string sep = ",";
-  while (ros::ok()) {
-    switch (wcc) {
-      case stop: {
-        cpgen.stop();
-        break;
-      }
-      case start: {
-        cpgen.start();
-        break;
-      }
-      case finish: {
-        ros::shutdown();
-        break;
-      }
-      case neutral: {
-        break;
-      }
-    }
-    wcc = neutral;
-    cpgen.setLandPos(land_pos);
-    cpgen.getWalkingPattern(&wp_com, &wp_right_leg_pos, &wp_left_leg_pos);
-    double rl = cpgen.getSwingleg()*0.01 - 0.005;
-    double secs = ros::Time::now().toSec();
-    cp::Vector2 ref_zmp = cpgen.getRefZMP();
-    cp::Vector2 end_cp = cpgen.getEndCP();
-    int wstate = cpgen.getWstate();
-
-    wp_right_leg_pos.p().y() = fabs(wp_right_leg_pos.p().y()) * -1;
-    wp_left_leg_pos.p().y() = fabs(wp_left_leg_pos.p().y()) * -1;
-    body.calcLegIK(wp_com, wp_right_leg_pos.affine(), wp_left_leg_pos.affine());
-    ofs << secs << sep << rl << sep << wstate << sep << wp_com[0] << sep << wp_com[1] << sep << wp_com[2] << sep << ref_zmp[0] << sep << ref_zmp[1] << sep << end_cp[0] << sep << end_cp[1] << std::endl;
-    rate.sleep();
-  }
+  cpgen.setLandPos(land_pos);
+  cpgen.getWalkingPattern(&wp_com, &wp_right_leg_pos, &wp_left_leg_pos);
+  body.calcLegIK(wp_com, wp_right_leg_pos.affine(), wp_left_leg_pos.affine());
   ROS_INFO("CP walk finish");
   return 0;
 }
