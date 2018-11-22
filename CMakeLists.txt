@@ -109,11 +109,13 @@ find_package(Eigen3 REQUIRED)
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
+set(cpgen_LIBRALIES /usr/local/lib/libcpgen.so)
+set(cpgen_INCLUDE_DIRECTORIES /usr/local/include/cpgen)
 catkin_package(
- INCLUDE_DIRS include
+# INCLUDE_DIRS include
  LIBRARIES robotis_op_cpwalk
  CATKIN_DEPENDS roscpp rospy std_msgs geometry_msgs sensor_msgs tf
- DEPENDS system_lib
+ DEPENDS cpgen
 )
 
 ###########
@@ -128,6 +130,7 @@ include_directories(
   ${robotis_op_utility_INCLUDE_DIRS}
 )
 include_directories(${EIGEN3_INCLUDE_DIR})
+include_directories(${cpgen_INCLUDE_DIRECTORIES})
 
 ## Declare a C++ library
 
@@ -141,7 +144,7 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/main.cpp)
 add_executable(test_${PROJECT_NAME} src/test.cpp)
-add_executable(demotest_${PROJECT_NAME} src/demoWPG_test.cpp)
+#add_executable(demotest_${PROJECT_NAME} src/demoWPG_test.cpp)
 
 
 ## Rename C++ executable without prefix
@@ -157,15 +160,15 @@ add_executable(demotest_${PROJECT_NAME} src/demoWPG_test.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
-  /usr/local/lib/cpgen/libcpgen.so
+  ${cpgen_LIBRALIES}
 )
 target_link_libraries(test_${PROJECT_NAME}
   ${catkin_LIBRARIES}
-  /usr/local/lib/cpgen/libcpgen.so
+  ${cpgen_LIBRALIES}
 )
-target_link_libraries(demotest_${PROJECT_NAME}
-  ${catkin_LIBRARIES}
-)
+#target_link_libraries(demotest_${PROJECT_NAME}
+#  ${catkin_LIBRARIES}
+#)
 
 
 #############
