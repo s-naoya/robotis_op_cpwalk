@@ -8,22 +8,19 @@
 // /robotis_op/cmd_pos  : geometry_msgs/Pose2D.h
 //   next step distance <x[m], y[m], theta[degree]>
 
+#include <iostream>
+#include <fstream>
+#include <unordered_map>
+
 #include <ros/ros.h>
-
-#include <cpgen/cpgen.h>
-
-#include <robotis_op_utility/robotis_body.h>
-
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Vector3.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/Int32.h>
 
-#include <unordered_map>
-
-#include<iostream>
-#include<fstream>
+#include <cpgen/cpgen.h>
+#include <conoid/robot.h>
 
 enum walk_control_command { stop = 1, start = 2, finish = 3, neutral = 4 };
 walk_control_command wcc;
@@ -205,14 +202,10 @@ int main(int argc, char** argv) {
     cpgen.getWalkingPattern(&wp_com, &wp_right_leg_pos, &wp_left_leg_pos);
     double rl = cpgen.getSwingleg()*0.01 - 0.005;
     double secs = ros::Time::now().toSec();
-    cp::Vector2 ref_zmp = cpgen.getRefZMP();
-    cp::Vector2 end_cp = cpgen.getEndCP();
-    int wstate = cpgen.getWstate();
 
     wp_right_leg_pos.p().y() = fabs(wp_right_leg_pos.p().y()) * -1;
     wp_left_leg_pos.p().y() = fabs(wp_left_leg_pos.p().y()) * -1;
     body.calcLegIK(wp_com, wp_right_leg_pos.affine(), wp_left_leg_pos.affine());
-    ofs << secs << sep << rl << sep << wstate << sep << wp_com[0] << sep << wp_com[1] << sep << wp_com[2] << sep << ref_zmp[0] << sep << ref_zmp[1] << sep << end_cp[0] << sep << end_cp[1] << std::endl;
     rate.sleep();
   }
   ROS_INFO("CP walk finish");

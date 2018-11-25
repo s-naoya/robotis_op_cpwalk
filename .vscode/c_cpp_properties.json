@@ -4,7 +4,9 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/opt/ros/melodic/include"
+                "/opt/ros/melodic/include",
+                "/usr/include/eigen3",
+                "/usr/local/include/choreonoid-1.7"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
